@@ -1,0 +1,37 @@
+include:
+  - .gitlab/ci/*.gitlab-ci.yml
+
+stages:
+  - inject-secrets
+  - build
+  - deploy
+
+inject-secrets:
+  stage: inject-secrets
+  extends: .vault_template
+  variables:
+    SECRET_PATHS: "secret/k8s/ucode-prod/transcoder-service"
+    VAULT_AUTH_PATH: $VAULT_AUTH_PATH
+    VAULT_AUTH_ROLE: $VAULT_AUTH_ROLE
+  only:
+  - master
+
+build:
+  stage: build
+  extends: .build_template
+  variables:
+    ENV_TAG: latest
+    DOCKERFILE: Dockerfile
+  only:
+    - master
+
+deploy:
+  stage: deploy
+  extends: .deploy_template
+  variables:
+    NEW_IMAGE: "gitlab.udevs.io:5050/$CI_PROJECT_NAMESPACE/${CI_PROJECT_NAME}:${CI_PIPELINE_IID}"
+    OLD_PATTERN: "gitlab.udevs.io:5050/$CI_PROJECT_NAMESPACE/${CI_PROJECT_NAME}:[a-zA-Z0-9_\\.\\-]*"
+    SERVICE_FILE: "/etc/systemd/system/transcoder.service"
+    TRANSCODER_PRIVATE_KEY: $TRANSCODER_PRIVATE_KEY
+  only:
+    - master
