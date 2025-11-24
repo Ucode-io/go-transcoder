@@ -1,0 +1,28 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ master, staging ]
+
+jobs:
+  vault:
+    uses: Ucode-io/ci-cd/.github/workflows/get_vault_secrets.yml@main
+    secrets:
+      VAULT_AUTH_PATH: ${{ secrets.VAULT_AUTH_PATH }}
+      VAULT_AUTH_ROLE: ${{ secrets.VAULT_AUTH_ROLE }}
+      VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+      VAULT_AUDIENCE: ${{ secrets.VAULT_AUDIENCE }}
+    with:
+      ENVIRONMENT: ${{ github.ref_name == 'master' && 'production' || github.ref_name == 'staging' && 'test' || 'unknown' }}
+  build:
+    uses: Ucode-io/ci-cd/.github/workflows/build.yml@main
+    with:
+      ENV_TAG: ${{ github.ref_name == 'master' && 'latest' || github.ref_name == 'staging' && 'test' || 'unknown' }}
+    secrets:
+      REGISTRY: ${{ secrets.REGISTRY }}
+  deploy:
+    uses: Ucode-io/ci-cd/.github/workflows/deploy.yml@main
+    secrets:
+      CLUSTER: ${{ github.ref_name == 'master' && 'cluster-prod' || github.ref_name == 'staging' && 'cluster-dev' || 'unknown' }} 
+      K8S_NAMESPACE: ${{ github.ref_name == 'master' && 'ucode-prod' || github.ref_name == 'staging' && 'ucode-test' || 'unknown' }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
