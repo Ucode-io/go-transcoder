@@ -1,6 +1,7 @@
 name: CI/CD
 
 on:
+  workflow_dispatch:
   push:
     branches: [ master, staging ]
 
@@ -9,11 +10,18 @@ permissions:
   packages: write
 
 jobs:
-  vault:
-    uses: Ucode-io/ci-cd/.github/workflows/vault_ci_cd.yml@main
-    secrets:
-      inherit: true
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  ci-cd-prod:
+    if: github.ref_name == 'master'
+    uses: Ucode-io/ci-cd/.github/workflows/ci_cd_docker.yml@main
     with:
-      ENVIRONMENT: ${{ github.ref_name == 'master' && 'production' || github.ref_name == 'staging' && 'test' || 'unknown' }}
-      ENV_TAG: ${{ github.ref_name == 'master' && 'latest' || github.ref_name == 'staging' && 'test' || 'unknown' }}
+      ENVIRONMENT: production
+      ENV_TAG: latest
+    secrets: inherit
+
+  ci-cd-staging:
+    if: github.ref_name == 'staging'
+    uses: Ucode-io/ci-cd/.github/workflows/ci_cd_docker.yml@main
+    with:
+      ENVIRONMENT: staging
+      ENV_TAG: test
+    secrets: inherit
