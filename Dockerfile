@@ -12,7 +12,7 @@ COPY . .
 
 RUN go mod vendor && make build
 
-FROM gitlab.udevs.io:5050/devops/transcoder/cpu:latest
+FROM ghcr.io/ucode-io/go-transcoder:cpu
 RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
 
 
