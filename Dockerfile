@@ -12,7 +12,7 @@ COPY . .
 
 RUN go mod vendor && make build
 
-FROM ghcr.io/ucode-io/go-transcoder:cpu
+FROM docker pull ghcr.io/ucode-io/go-transcoder-image:cpu
 RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
 
 
