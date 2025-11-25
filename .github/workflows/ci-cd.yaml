@@ -17,11 +17,3 @@ jobs:
       ENVIRONMENT: production
       ENV_TAG: latest
     secrets: inherit
-
-  ci-cd-staging:
-    if: github.ref_name == 'staging'
-    uses: Ucode-io/ci-cd/.github/workflows/ci_cd_docker.yml@main
-    with:
-      ENVIRONMENT: staging
-      ENV_TAG: test
-    secrets: inherit
